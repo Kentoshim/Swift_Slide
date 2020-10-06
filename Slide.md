@@ -86,6 +86,7 @@ var hoge: String
 let hoge: String = "hoge" // 初期値を与えるパターン
 let hoge = "hoge" // 初期値を与えて型名を省略するパターン
 var hoge: String { String(12) } // クロージャ(後述)の結果を返すパターン
+let hoge = { String(12) }()
 ```
 型推論が効くので初期値を与える場合は型名を省略して構いません、
 クロージャの結果を渡す場合は書いた方がいいでしょう。
@@ -183,6 +184,7 @@ func greet(name: String?) {
         print("名前を入力してください")
     }
 }
+guard hoge == "" else { return }
 ```
 if文のようにunwrapします。
 値があるなら直後のブロックを処理し、なければ`else`節を実行します。
@@ -243,3 +245,149 @@ greet(name: name!)
 ***地獄に落ちます***
 
 特に`force unwrap`はプログラムの安全性を損なう危険があるので注意しましょう。
+
+
+---
+
+# enum
+有限の種類やパターンを表現します
+基本的なやつ
+```swift　
+enum　UserType　{
+  case premium
+  case free
+  case anonymous
+}
+// まとめて定義
+enum UserType{
+  case premium, free, anonymous
+}
+```
+
+---
+
+switch式の分岐に使えます
+```swift
+switch userType {
+  case .premium: print("premium user")
+  case .free: print("free user")
+  case .anonymous: print("anonymous user")
+}
+```
+switch式ではパターンの網羅性が担保されます
+この場合caseは３つしかないのでdefaultを書く必要はありません
+
+---
+このようにメソッドが持てます
+``` swift
+enum UserType{
+  case premium, free, anonymous
+
+  func  isPremium() -> Bool {
+      return self == .premium
+  }
+}
+```
+```swift
+let user = UserType.free
+let user: UserType = .free
+user.isPremium() // false
+```
+
+- enumの型名は省略できることが多いです
+  (型推論によって型が限定できる場合)
+---
+このように値が持てます
+```swift
+enum UserType {
+  case premium(id: Int, name: String, creditCard: String?)
+  case free(id: Int, name: String)
+  case anonyumous
+}
+```
+caseそれぞれで型や値の数は異なっていてもいいです
+
+
+---
+# パターンマッチ
+enumの持っている値を取り出すにはパターンマッチを使います
+```swift
+switch user {
+  case .anonyumous: print("anonymousUser")
+  case .free(let id, let name): print("\(name)'s id is \(id)")
+  case .premium(let id, let name, _): print("\(name)'s id is \(id)") }
+  }
+}
+```
+---
+
+タプルでもパターンマッチできます
+```swift
+let twin = (12, "Tom")
+
+switch twin {
+  case let (id, name): ~~~
+}
+```
+
+---
+
+こんな風にifやguardと組み合わせることもできます（最近知った）
+```swift
+//　"_"を使うと値を破棄します
+if case .free(let id, _) = userType {}
+guard case .free = userType else {}
+
+func hoge(user: UserType) {
+  if case .free(let id, _) = user {
+    print(id)
+  } else { print("none")}
+}
+
+func fuga(user: UserType) {
+  // 束縛する変数名に?をつけるとnilでない場合のみマッチします
+  guard case .premium(_, _, let card?) = user else { 
+    print(user)
+    return
+  }
+  print(card)
+}
+```
+
+---
+# closure
+
+要するにラムダ式みたいなものです
+```swift
+let closure: ((String) -> (Int, String)) = { str in
+  return (str.count, str)
+}
+
+let closure = { (str: String) in
+      (str.count, str) 
+    } 
+```
+---
+```swift
+struct TextField {
+  let text: String
+
+  init(_ text: String) {
+      self.text = text
+  }
+}
+
+
+let hoge = textlist.reduce([]: [TextField]) {
+  if $0.map({ $0.text })
+    .contains($1.text) {
+      print($1.text)
+    }
+    $0 + [$1]
+}
+map({$0 * 2})
+showAlert(title: "", message: "") {
+    $0 * 2
+  }
+
+```
